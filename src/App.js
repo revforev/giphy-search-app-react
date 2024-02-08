@@ -3,10 +3,10 @@ import React, {Component} from 'react';
 import loader from './images/loader.svg';
 import './css/main.css';
 
-  const randomChoice = arr => {
+const randomChoice = (arr) => {
   const randIndex = Math.floor(Math.random() * arr.length);
   return arr[randIndex];
-}
+};
 
 const Header = () => (
   <div className="header grid">
@@ -30,10 +30,10 @@ class App extends Component {
       searchTerm: '',
       hintText: 'Hit enter to search',
       gif: null,
+      // we have an array of gifs
+      gifs: [],
     };
   }
-  
-
 
   // we want a function that searches the giphy api
   // using fetch and pus the search term into the query
@@ -53,14 +53,17 @@ class App extends Component {
       const {data} = await response.json();
 
       // here we grab a random result from our images
-      const randomGif = randomChoice(data)
+      const randomGif = randomChoice(data);
 
-      console.log({randomGif})
+      console.log({randomGif});
 
       this.setState((prevState, props) => ({
         ...prevState,
         // get the first result and put it in the state
-        gif: randomGif
+        gif: randomGif,
+        // here we use our spread to take the previous gifs
+        // spread them out and then add a new gif onto the end
+        gifs: [...prevState.gifs, randomGif],
       }));
     } catch (error) {}
   };
@@ -99,8 +102,6 @@ class App extends Component {
     console.log(event.key);
   };
 
-
-
   render() {
     const {searchTerm, gif} = this.state;
     return (
@@ -110,8 +111,11 @@ class App extends Component {
           {/* {stack of gif images} */}
           {/* it's only going to render our video when we have a gif
           // in the state, we can test for it using && */}
-          {gif && 
-          <video className="grid-item video" autoPlay loop src={gif.images.original.mp4} />}
+
+          {this.state.gifs.map((gif) => (
+            <video className="grid-item video" autoPlay loop src={gif.images.original.mp4} />
+          ))}
+
           <input
             className="input grid-item"
             placeholder="Type something"
