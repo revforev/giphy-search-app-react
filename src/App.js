@@ -3,6 +3,11 @@ import React, {Component} from 'react';
 import loader from './images/loader.svg';
 import './css/main.css';
 
+  const randomChoice = arr => {
+  const randIndex = Math.floor(Math.random() * arr.length);
+  return arr[randIndex];
+}
+
 const Header = () => (
   <div className="header grid">
     <h1 className="title">Jiffy</h1>
@@ -24,8 +29,41 @@ class App extends Component {
     this.state = {
       searchTerm: '',
       hintText: 'Hit enter to search',
+      gif: null,
     };
   }
+  
+
+
+  // we want a function that searches the giphy api
+  // using fetch and pus the search term into the query
+  // url and then we can do something with the results
+
+  // we can also write async methods into our components
+  // that let us use the async/await style of function
+
+  searchGiphy = async (searchTerm) => {
+    try {
+      const response = await fetch(
+        `https://api.giphy.com/v1/gifs/search?api_key=YLaXcGQpJq0zBZcIINCx3INyMdrdAgcb&q=${searchTerm}&limit=25&offset=0&rating=r&lang=en&bundle=messaging_non_clips`
+      );
+
+      // here we convert our raw response into json data
+      // const {data} gets the .data part of our repsponse
+      const {data} = await response.json();
+
+      // here we grab a random result from our images
+      const randomGif = randomChoice(data)
+
+      console.log({randomGif})
+
+      this.setState((prevState, props) => ({
+        ...prevState,
+        // get the first result and put it in the state
+        gif: randomGif
+      }));
+    } catch (error) {}
+  };
 
   handleChange = (event) => {
     console.log(event.key);
@@ -41,7 +79,7 @@ class App extends Component {
       searchTerm: value,
       // we set the hint text only when we have more then
       // 2 characters in our input, otherwise it is an empty string
-      hintText: value.length >2 ? `Hit enter to search ${value}` : '',
+      hintText: value.length > 2 ? `Hit enter to search ${value}` : '',
     }));
 
     if (value.length > 2) {
@@ -54,19 +92,26 @@ class App extends Component {
     // when we have 2 or more characters in our search box
     // and we have also pressed enter, we then want to run a search
     if (value.length > 2 && event.key === 'Enter') {
-      alert(`search for ${value}`);
+      // here we call our searchGiphy function using the search term
+      this.searchGiphy(value);
     }
 
     console.log(event.key);
   };
 
+
+
   render() {
-    const {searchTerm} = this.state;
+    const {searchTerm, gif} = this.state;
     return (
       <div className="page">
         <Header />
         <div className="search grid">
           {/* {stack of gif images} */}
+          {/* it's only going to render our video when we have a gif
+          // in the state, we can test for it using && */}
+          {gif && 
+          <video className="grid-item video" autoPlay loop src={gif.images.original.mp4} />}
           <input
             className="input grid-item"
             placeholder="Type something"
